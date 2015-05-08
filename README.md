@@ -1,8 +1,10 @@
 # mandel
 messing around with the mandelbrot set in javascript using
-the html5 canvas and WebWorker api
+the html5 canvas and WebWorker api.
 
-Every point in the complex plain that is a member of the mandelbrot
+https://en.wikipedia.org/wiki/Mandelbrot_set
+
+Every point in a given complex plane that is a member of the mandelbrot
 set is passed as a message from the webworker back to the main page
 
 Tested with IE11, Firefox 37 and Chrome 42 on Windows 8.1.
