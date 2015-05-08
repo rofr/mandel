@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title></title>
+    <title>Mandelbrot</title>
     <style>
         #mandel {
             border: 1px solid black;
@@ -28,11 +28,14 @@
             canvas.width = 500;
             canvas.height = 500;
             var ctx = canvas.getContext("2d");
+
+            //an offline 1x1 pixel
             var pixel = ctx.createImageData(1, 1);
             pixel.data[0] = pixel.data[1] = pixel.data[2] = 0;
             pixel.data[3] = 255;
             $("#render").click(function () {
 
+                //start with a black background
                 ctx.clearRect(0,0,canvas.width, canvas.height);
                 var args = {
                     xmax: $("#maxX").val() - 0,

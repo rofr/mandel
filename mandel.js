@@ -1,92 +1,89 @@
+"use strict"
+
 self.addEventListener("message", function (message) {
     var args = message.data;
     console.log("worker received message", args);
-    graph(args);
+    calc_graph(args);
     console.log("worker done");
     self.close();
 });
 
-function graph(args) {
-    var deltaX = (args.xmax - args.xmin) / args.width;
-    var deltaY = (args.ymax - args.ymin) / args.height;
-    x = args.xmin;
-    y = args.ymin;
+// check every point in the 2 dimensional complex plane
+//bounded by args.
+function calc_graph(args) {
+
+    //calculate the distances between each screen pixel
+    var x_step = (args.xmax - args.xmin) / args.width;
+    var y_step = (args.ymax - args.ymin) / args.height;
+
+    //current complex number
+    var x = args.xmin;
+    var y = args.ymin;
 
 
     for (var scaleX = 0; scaleX < args.width; scaleX++) {
         y = args.ymin;
         for (var scaleY = 0; scaleY < args.height; scaleY++) {
-            var z = new Complex(0, 0);
             var c = new Complex(x,y);
-            if(mandelbrot(z,c)) postMessage({ x: scaleX, y: scaleY });
-            y += deltaY;
+            if(is_mandelbrot_member(c)) {
+              postMessage({ x: scaleX, y: scaleY });
+            }
+            y += y_step;
         }
-        x += deltaX;
+        x += x_step;
     }
 }
 
-var escape_radius_squared = 4;
-//var escapeRadiusLog2 = Math.log2(escapeRadius);
-function mandelbrot(z, c) {
-    var max_iter = 100;
-    var dist_squared;
+//points this far from origo will grow unbounded
+var escape_radius = 2;
+
+function is_mandelbrot_member(c) {
+    var max_iterations = 100;
     var n = 0;
-    while(true) {
-      z.multiply_by(z).increment_with(c);
-      if (n++ > max_iter) break;
-      dist_squared = z.imag * z.imag + z.real * z.real;
-      if (dist_squared > escape_radius_squared) break;
-
+    var z = Complex.zero;
+    while(n++ < max_iterations) {
+      z = z.multiply(z).add(c);
+      var abs = z.abs();
+      if (abs > escape_radius) break;
     }
-    return dist_squared < escape_radius_squared;
-    //return n - Math.log2(Math.log2(abs) / escapeRadiusLog2);
+    return abs < escape_radius;
 }
 
 
+//Complex number ai + b, where i = Math.sqrt(-1)
 var Complex = (function () {
-    function Complex(i, r) {
-        this.imag = i;
-        this.real = r;
+    function Complex(a, b) {
+        this.a = a;
+        this.b = b;
     }
 
-    Complex.prototype.multiply_by = function(c) {
-      var real = this.real * c.real;
-      real -= this.imag * c.imag;
+    Complex.prototype.multiply = function (complex) {
 
-      var imag = this.real * c.imag;
-      imag += this.imag * c.real;
+        //calculate the real coefficient
+        var b = this.b * complex.b;
+        b -= this.a * complex.a;
 
-        this.imag = imag;
-        this.real = real;
-        return this;
+        //calculate the imaginary coefficient
+        var a = this.b *complex.a;
+        a += this.a * complex.b;
+
+        return new Complex(a,b);
     }
 
-    Complex.prototype.increment_with = function(c) {
-      this.imag += c.imag;
-      this.real += c.real;
-    }
-
-
-
-    Complex.prototype.multiply = function (c) {
-        var real = this.real * c.real;
-        real -= this.imag * c.imag;
-
-        var imag = this.real * c.imag;
-        imag += this.imag * c.real;
-
-        return new Complex(imag,real);
-    }
-
-    Complex.prototype.add = function (c) {
-        return new Complex(this.imag + c.imag, this.real + c.real);
+    Complex.prototype.add = function (complex) {
+        var a = this.a + complex.a;
+        var b = this.b + complex.b;
+        return new Complex(a,b);
     }
 
     Complex.prototype.abs = function () {
-        var i = this.imag;
-        var r = this.real;
-        return Math.sqrt(i * i + r * r);
+        var a = this.a;
+        var b = this.b;
+        return Math.sqrt(a * a + b * b);
     }
+
+    Complex.zero = new Complex(0,0);
+
     return Complex;
 }
 )();
