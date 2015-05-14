@@ -1,6 +1,6 @@
 # mandel
 messing around with the mandelbrot set in javascript using
-the html5 canvas and WebWorker api.
+the html5 canvas and WebWorker api. Try it out online at http://rofr.github.io/mandel
 
 https://en.wikipedia.org/wiki/Mandelbrot_set
 
